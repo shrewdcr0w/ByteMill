@@ -1,0 +1,9 @@
+ID,Name,Email,Phone,Join_Date,Salary,Department
+1,  John Doe  ,john.doe@email.com,555-0100,2023-01-15,65000,Engineering
+2,Jane Smith,,555-0101,15/01/2023,72000,Sales
+3,Bob Jones,bob@email.com,555-0102,,1400000,HR
+4, Alice Brown ,alice.b@email.com,555-0103,2023-01-17,68000,Engineering
+1,  John Doe  ,john.doe@email.com,555-0100,2023-01-15,65000,Engineering
+6,Tom Wilson,tom@email.com,555-0105,2023-01-18,NaN,Marketing
+This,is,a,completely,broken,row,that,has,way,too,many,columns,and,will,trigger,the,error,log,to,test,it
+8,Sarah Connor,sarah@email.com,555-0107,2023-01-19,95000,IT

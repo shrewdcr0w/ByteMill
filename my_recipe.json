@@ -1,0 +1,12 @@
+{
+  "strip_whitespace": true,
+  "normalize_nulls": true,
+  "text_fill_value": "MISSING",
+  "num_fill_value": -999.0,
+  "deduplicate_exact": true,
+  "deduplicate_keys": ["id"],
+  "pii_masking": {
+    "method": "mask",
+    "columns": null
+  }
+}

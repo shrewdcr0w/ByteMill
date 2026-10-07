@@ -1,0 +1,15 @@
+# Core Data Processing Engine
+pandas>=2.0.0
+openpyxl>=3.1.2
+
+# Advanced Cleaning Capabilities
+thefuzz>=0.20.0
+chardet>=5.2.0
+
+# Local Web Interface
+Flask>=3.0.0
+Werkzeug>=3.0.0
+
+# Developer & Packaging Tools
+pytest>=7.4.0
+pyinstaller>=6.3.0

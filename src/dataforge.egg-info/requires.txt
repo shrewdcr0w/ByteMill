@@ -1,0 +1,4 @@
+pandas>=2.0.0
+flask>=3.0.0
+chardet>=5.2.0
+pyarrow>=14.0.0

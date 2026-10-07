@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+src/bytemill/__init__.py
+src/bytemill.egg-info/PKG-INFO
+src/bytemill.egg-info/SOURCES.txt
+src/bytemill.egg-info/dependency_links.txt
+src/bytemill.egg-info/entry_points.txt
+src/bytemill.egg-info/requires.txt
+src/bytemill.egg-info/top_level.txt
+src/bytemill/io/detect/__init__.py

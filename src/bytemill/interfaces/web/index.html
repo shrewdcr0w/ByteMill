@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteMill | Local Cleaning Engine</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --border: #444;
+            --text: #00ffcc;
+            --text-dim: #888;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: var(--surface);
+            border: 2px solid var(--border);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 5px 5px 0px #000;
+        }
+        h1 {
+            text-transform: uppercase;
+            border-bottom: 2px dashed var(--border);
+            padding-bottom: 10px;
+        }
+        .drop-zone {
+            border: 2px dashed var(--text);
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            background: #000;
+        }
+        .drop-zone:hover { background: #111; }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            background-color: var(--text);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+        button:hover { background-color: #fff; }
+        #status { margin-top: 20px; color: var(--text-dim); }
+        a { color: #fff; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ByteMill UI</h1>
+        <p>> SYSTEM: ONLINE. AWAITING DATA.</p>
+        
+        <form id="uploadForm">
+            <div class="drop-zone" id="dropZone">
+                [ CLICK TO SELECT DATA FILE ]
+                <input type="file" id="fileInput" accept=".csv, .json, .xlsx, .xls" style="display: none;">
+            </div>
+
+        <div class="form-group">
+           <label for="output_format">Choose Output Format:</label>
+           <select name="output_format" id="output_format">
+           <option value=".csv">CSV (Best for massive files)</option>
+           <option value=".json">JSON Lines (.json)</option>
+           <option value=".xlsx">Excel (Small files only)</option>
+           </select>
+        </div>
+
+        <div class="controls">
+            <label><input type="checkbox" id="chkWhitespace" checked> Strip Whitespace</label>
+            <label><input type="checkbox" id="chkNulls" checked> Normalize Nulls</label>
+            <label><input type="checkbox" id="chkDedupe" checked> Remove Exact Duplicates</label>
+            <label><input type="checkbox" id="chkDates"> Normalize Dates (ISO 8601)</label>
+            <label><input type="checkbox" id="chkAddress"> Standardize Addresses</label>
+            <label><input type="checkbox" id="chkCluster"> Cluster Similar Categories</label>
+            <label><input type="checkbox" id="chkOutliers"> Flag Statistical Outliers</label>
+            <label><input type="checkbox" id="chkPII"> Enable PII Masking (Vault Generation)</label>
+        </div>
+
+            <button type="submit" id="btnRun">Execute Pipeline</button>
+        </form>
+
+        <div id="status"></div>
+        <div id="downloadLinks" style="display:none; margin-top: 20px;">
+            <p>Task Complete:</p>
+            <a id="linkClean" href="#">> Download Clean Data</a><br><br>
+            <a id="linkVault" href="#" style="display:none; color: #ff5555;">> Download PII Vault</a>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            if(fileInput.files.length) dropZone.innerText = `[ SELECTED: ${fileInput.files[0].name} ]`;
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!fileInput.files[0]) return alert('Select a file first.');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            // Construct recipe from UI checkboxes
+        const recipe = {
+            strip_whitespace: document.getElementById('chkWhitespace').checked,
+            normalize_nulls: document.getElementById('chkNulls').checked,
+            deduplicate_exact: document.getElementById('chkDedupe').checked,
+            normalize_dates: document.getElementById('chkDates').checked,
+            standardize_addresses: document.getElementById('chkAddress').checked,
+            cluster_categories: document.getElementById('chkCluster').checked,
+            detect_outliers: document.getElementById('chkOutliers').checked,
+            deduplicate_fuzzy: null, // Set to a column name string if you want to use it via UI later
+            pii_masking: document.getElementById('chkPII').checked ? { method: "mask", columns: null } : false
+        };
+            formData.append('recipe', JSON.stringify(recipe));
+
+            document.getElementById('status').innerText = "> PROCESSING...";
+            document.getElementById('downloadLinks').style.display = 'none';
+
+            const response = await fetch('/api/clean', { method: 'POST', body: formData });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                document.getElementById('status').innerText = `> SUCCESS: Reduced from ${result.stats.original_rows} to ${result.stats.final_rows} rows.`;
+                
+                document.getElementById('linkClean').href = result.download_url;
+                
+                if (result.vault_url) {
+                    const vaultLink = document.getElementById('linkVault');
+                    vaultLink.href = result.vault_url;
+                    vaultLink.style.display = 'block';
+                }
+                
+                document.getElementById('downloadLinks').style.display = 'block';
+            } else {
+                document.getElementById('status').innerText = "> ERROR: " + result.error;
+            }
+        });
+    </script>
+</body>
+</html>
